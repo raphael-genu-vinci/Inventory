@@ -8,6 +8,7 @@ CREATE TABLE ingredient (
     name TEXT NOT NULL,
     quantity INTEGER NOT NULL,
     expiration_date DATE NOT NULL,
-    in_date DATE NOT NULL,
+    in_date DATE NOT NULL
 );
+
 
