@@ -1,5 +1,6 @@
 import sqlite3
 import os 
+import datetime
 from info import ingredients_requirements
 
 class DataManager:
@@ -14,17 +15,48 @@ class DataManager:
         return self.connection
     
     def add_item(self, ingredient_id, type, name, quantity, expiration_date, in_date):
-        self.cursor.execute(
-        'INSERT INTO ingredient (ingredient_id, type, name, quantity, in_date, expiration_date) VALUES (?, ?, ?, ?, ?, ?)',
-        (ingredient_id, type, name, quantity, in_date, expiration_date)
-        )
-        self.connection.commit()
+        """
+        Adds an item to the database.
+        
+        Parameters:
+            ingredient_id (int): The ID of the ingredient.
+            type (str): The type of the ingredient.
+            name (str): The name of the ingredient.
+            quantity (float): The quantity of the ingredient.
+            expiration_date (datetime.date): The expiration date of the ingredient.
+            in_date (datetime.date): The date the ingredient was added.
 
-    def delete_item(self, ingredient_id, id):
-        self.cursor.execute('DELETE FROM ingredient WHERE ingredient_id = ? AND id = ?', (ingredient_id, id))
-        self.connection.commit()
+        Raises:
+            Exception: If there is an error while adding the item.
+        """
+        try :
+            self.cursor.execute(
+            'INSERT INTO ingredient (ingredient_id, type, name, quantity, in_date, expiration_date) VALUES (?, ?, ?, ?, ?, ?)',
+            (ingredient_id, type, name, quantity, in_date, expiration_date)
+            )
+            self.connection.commit()
+        except Exception as e:
+            print("Error while adding item : ", e)
+
+    def delete_item(self, id):
+        """
+        Deletes an item from the database.
+
+        Parameters:
+            id (int): The ID of the item to be deleted.
+        """
+        try :
+            self.cursor.execute('DELETE FROM ingredient WHERE id = ?', (id,))
+            self.connection.commit()
+        except Exception as e:
+            print("Error while deleting item : ", e)
 
     def get_all_items(self):
+        """
+        Get all items from the database and calculate the total quantity of each item.
+        Returns:
+            quantity_by_name (dict): A dictionary with the total quantity of each item indexed by name.
+        """
         quantity_by_name = {}
         self.cursor.execute('SELECT * FROM ingredient')
         elements = self.cursor.fetchall()
@@ -38,6 +70,18 @@ class DataManager:
         return quantity_by_name
     
     def check_missing_items(self):
+        """
+        Check for missing items in the inventory.
+
+        This function compares the items in the inventory with the required items and returns a list of missing items.
+        It iterates over the requirements dictionary and checks if each item is present in the inventory.
+        If an item is missing, it calculates the difference between the required quantity and the quantity in the inventory
+        and appends it to the missing_items list.
+
+        Returns:
+            missing_items (list): A list of missing items. Each item in the list is a list containing the item name and the
+            difference between the required quantity and the quantity in the inventory.
+        """
         item_in = self.get_all_items()
         requirements = ingredients_requirements
         missing_items = []
@@ -50,10 +94,23 @@ class DataManager:
         return missing_items
     
     def check_expired_items(self):
-        pass
+        """
+        Check for expired items in the database and delete them. Returns the list of expired items.
+        """
+        today = datetime.date.today()
+        print(today)
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM ingredient WHERE expiration_date < ?', (today,))
+            expired_items = cursor.fetchall()
+        for item in expired_items:
+            self.delete_item(item[0])
+        return expired_items
     
+    def close(self):
+        """
+        Closes the connection to the database.
+        """
+        self.connection.close()
 
-if __name__ == '__main__':
-    data_manager = DataManager('../data/inventory.db')
-    #print(data_manager.check_missing_items())
-    data_manager.add_item(1, 'Sauce', 'Tomato sauce', 2, '2021-12-12', '2021-12-12')
+        
