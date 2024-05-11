@@ -14,7 +14,10 @@ class DataManager:
         return self.connection
     
     def add_item(self, ingredient_id, type, name, quantity, expiration_date, in_date):
-        self.cursor.execute('INSERT INTO ingredient VALUES (?, ?, ?, ?, ?, ?)', (ingredient_id, type, name, quantity, expiration_date, in_date))
+        self.cursor.execute(
+        'INSERT INTO ingredient (ingredient_id, type, name, quantity, in_date, expiration_date) VALUES (?, ?, ?, ?, ?, ?)',
+        (ingredient_id, type, name, quantity, in_date, expiration_date)
+        )
         self.connection.commit()
 
     def delete_item(self, ingredient_id, id):
@@ -38,15 +41,19 @@ class DataManager:
         item_in = self.get_all_items()
         requirements = ingredients_requirements
         missing_items = []
-        print(item_in)
         for item in requirements:
             if item not in item_in:
-                missing_items.append([item, 0])
+                missing_items.append([item, requirements[item][0] - item_in[item]])
             else:
                 if item_in[item] < requirements[item][0]:
                     missing_items.append([item, requirements[item][0] - item_in[item]])
         return missing_items
+    
+    def check_expired_items(self):
+        pass
+    
 
 if __name__ == '__main__':
     data_manager = DataManager('../data/inventory.db')
-    print(data_manager.check_missing_items())
+    #print(data_manager.check_missing_items())
+    data_manager.add_item(1, 'Sauce', 'Tomato sauce', 2, '2021-12-12', '2021-12-12')

@@ -12,8 +12,8 @@ CREATE TABLE ingredient (
 );
 
 INSERT INTO ingredient (ingredient_id, type, name, quantity, in_date, expiration_date) VALUES
-(0, 'Sauce', 'Tomate sauce', 1, '2024-01-01', '2024-01-05'),
-(0, 'Sauce', 'Tomate sauce', 1, '2024-01-01', '2024-01-05'),
+(0, 'Sauce', 'Tomato sauce', 1, '2024-01-01', '2024-01-05'),
+(0, 'Sauce', 'Tomato sauce', 1, '2024-01-01', '2024-01-05'),
 (1, 'Vegetable', 'Onion', 0.2, '2024-01-01', '2024-01-05'),
 (2, 'Vegetable', 'Carrot', 0.6, '2024-01-01', '2024-01-05'),
 (3, 'Vegetable', 'Lettuce', 0.6, '2024-01-01', '2024-01-05');
